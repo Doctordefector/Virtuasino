@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtuasino - Virtual Casino Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #0f212e;
+            --secondary-bg: #1a2c38;
+            --tertiary-bg: #243745;
+            --accent-green: #00e701;
+            --accent-red: #ff4949;
+            --text-primary: #ffffff;
+            --text-secondary: #7f8fa3;
+            --border-color: #2c3f4c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--secondary-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: var(--primary-bg);
+            min-width: 0;
+        }
+
+        .game {
+            display: none;
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            height: calc(100vh - 140px);
+        }
+
+        .game.active {
+            display: block;
+        }
+
+        .error-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-red);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); }
+            to { transform: translate(-50%, 0); }
+        }
+
+        /* Balance Display Styles */
+        .balance-display {
+            margin-bottom: 20px;
+        }
+
+        .balance-container {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .balance span {
+            color: var(--text-secondary);
+        }
+
+        .balance .amount {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .reset-balance {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reset-balance:hover {
+            background: var(--border-color);
+        }
+
+        /* Game Input Styles */
+        .input-group {
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        /* Button Styles */
+        .game-button {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            min-width: 120px;
+        }
+
+        .game-button.primary {
+            background: var(--accent-green);
+            color: var(--primary-bg);
+        }
+
+        .game-button.primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .game-button.secondary {
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .game-button.secondary:hover {
+            background: var(--border-color);
+        }
+
+        .game-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Animation Classes */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes flash {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .flash {
+            animation: flash 0.3s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 10px;
+            }
+
+            .nav-items {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .nav-item {
+                flex: 0 0 auto;
+                padding: 8px 16px;
+            }
+
+            .main-content {
+                padding: 10px;
+            }
+
+            .game {
+                height: calc(100vh - 200px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">Virtuasino</div>
+            <nav class="nav-items">
+                <button class="nav-item active" data-game="crash">
+                    <span class="icon">📈</span>
+                    <span>Crash</span>
+                </button>
+                <button class="nav-item" data-game="plinko">
+                    <span class="icon">📍</span>
+                    <span>Plinko</span>
+                </button>
+                <button class="nav-item" data-game="mines">
+                    <span class="icon">💣</span>
+                    <span>Mines</span>
+                </button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div id="crash-game" class="game active"></div>
+            <div id="plinko-game" class="game"></div>
+            <div id="mines-game" class="game"></div>
+        </main>
+    </div>
+
+    <!-- Core modules -->
+    <script type="module" src="js/loading-manager.js"></script>
+    <script type="module" src="js/settings.js"></script>
+    <script type="module" src="js/utils.js"></script>
+
+    <!-- Game modules -->
+    <script type="module" src="js/games/crash.js"></script>
+    <script type="module" src="js/games/plinko.js"></script>
+    <script type="module" src="js/games/mines.js"></script>
+
+    <!-- Initialize app -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html> 
