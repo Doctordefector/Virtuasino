@@ -2,27 +2,34 @@
 export const STORAGE_KEY = 'virtuasino_balance';
 export const DEFAULT_BALANCE = 10000;
 
+// Balance Manager
 class BalanceManager {
     constructor() {
         this.balance = DEFAULT_BALANCE;
-        this.balanceDisplay = document.createElement('div');
-        this.balanceDisplay.className = 'balance-display';
-        document.querySelector('.main-content').insertBefore(this.balanceDisplay, document.querySelector('.game'));
-        this.setupBalanceDisplay();
+        this.balanceDisplay = null;
+    }
+
+    init() {
+        this.createBalanceDisplay();
         this.loadBalance();
     }
 
-    setupBalanceDisplay() {
+    createBalanceDisplay() {
+        this.balanceDisplay = document.createElement('div');
+        this.balanceDisplay.className = 'balance-display';
         this.balanceDisplay.innerHTML = `
             <div class="balance-container">
                 <div class="balance">
                     <span>Balance:</span>
-                    <span class="amount">10,000.00</span>
+                    <span class="amount">0.00</span>
                     <span class="currency">VCRED</span>
                 </div>
                 <button class="reset-balance">Reset Balance</button>
             </div>
         `;
+
+        const mainContent = document.querySelector('.main-content');
+        mainContent.insertBefore(this.balanceDisplay, mainContent.firstChild);
 
         // Add reset button listener
         this.balanceDisplay.querySelector('.reset-balance').addEventListener('click', () => {
@@ -74,64 +81,62 @@ class BalanceManager {
         indicator.textContent = `${amount >= 0 ? '+' : ''}${this.formatNumber(amount)}`;
         
         const rect = this.balanceDisplay.getBoundingClientRect();
-        indicator.style.position = 'absolute';
         indicator.style.left = `${rect.left + rect.width / 2}px`;
         indicator.style.top = `${rect.top}px`;
-        
-        // Add CSS
-        const style = document.createElement('style');
-        style.textContent = `
-            .balance-indicator {
-                position: absolute;
-                transform: translateX(-50%);
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 14px;
-                font-weight: 600;
-                color: var(--text-primary);
-                animation: floatUp 1s ease-out forwards;
-                pointer-events: none;
-                z-index: 1000;
-            }
-
-            .balance-indicator.positive {
-                background: var(--accent-green);
-            }
-
-            .balance-indicator.negative {
-                background: var(--accent-red);
-            }
-
-            @keyframes floatUp {
-                0% {
-                    opacity: 1;
-                    transform: translate(-50%, 0);
-                }
-                100% {
-                    opacity: 0;
-                    transform: translate(-50%, -20px);
-                }
-            }
-        `;
-        document.head.appendChild(style);
         
         document.body.appendChild(indicator);
         setTimeout(() => indicator.remove(), 1000);
     }
 }
 
+// Game Manager
+class GameManager {
+    constructor() {
+        this.activeGame = null;
+    }
+
+    init() {
+        this.setupNavigation();
+    }
+
+    setupNavigation() {
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                this.switchGame(item.dataset.game);
+            });
+        });
+    }
+
+    switchGame(gameName) {
+        this.activeGame = gameName;
+        
+        // Update navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.game === gameName);
+        });
+
+        // Update game display
+        document.querySelectorAll('.game').forEach(game => {
+            game.classList.toggle('active', game.id === `${gameName}-game`);
+        });
+    }
+}
+
+// Animation Utilities
 class AnimationUtils {
     shake(element) {
         element.classList.add('shake');
         setTimeout(() => element.classList.remove('shake'), 500);
     }
 
-    flash(element, color) {
+    flash(element) {
         element.classList.add('flash');
         setTimeout(() => element.classList.remove('flash'), 300);
     }
 }
 
+// Random Number Utilities
 class RandomUtils {
     between(min, max) {
         return Math.random() * (max - min) + min;
@@ -148,34 +153,6 @@ class RandomUtils {
 
 // Export instances
 export const balanceManager = new BalanceManager();
+export const gameManager = new GameManager();
 export const animate = new AnimationUtils();
-export const random = new RandomUtils();
-
-// Game Navigation
-export class GameManager {
-    constructor() {
-        this.setupNavigation();
-    }
-
-    setupNavigation() {
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', () => this.switchGame(item.dataset.game));
-        });
-    }
-
-    switchGame(gameName) {
-        // Update navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.game === gameName);
-        });
-
-        // Update game display
-        document.querySelectorAll('.game').forEach(game => {
-            game.classList.toggle('active', game.id === `${gameName}-game`);
-        });
-    }
-}
-
-// Initialize managers
-export const gameManager = new GameManager(); 
+export const random = new RandomUtils(); 
